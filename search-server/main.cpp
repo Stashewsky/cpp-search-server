@@ -60,12 +60,16 @@ public:
     void SetDocumentCount(const int& count){
         document_count_ = count;
     }
-
+    
+   double GetTermFrequency(const vector<string>& words, const string& word, const double& words_size){
+       return static_cast<double>(count(words.begin(), words.end(), word)) / words_size;
+   }
+    
     void AddDocument(int document_id, const string& document) {
         const vector<string> words = SplitIntoWordsNoStop(document);
-        double string_size = words.size();
-        for(string word : words){
-            double term_frequency = static_cast<double>(count(words.begin(), words.end(), word)) / string_size;
+        double words_size = words.size();
+        for(const string word : words){
+            double term_frequency = GetTermFrequency(words, word, words_size);
             documents_index_tf_[word].insert({document_id, term_frequency});
             }
         }
@@ -120,21 +124,23 @@ private:
         return plus_minus_words;
     }
 
-    double GetInverseDocumentFrequency(const string& word) const {
-        return log(static_cast<double>(document_count_)/documents_index_tf_.at(word).size());
-    };
-    
+    double GetIDF(const string& word) const {
+            double res = log(static_cast<double>(document_count_)/documents_index_tf_.at(word).size());
+        return res;
+        }
+
     vector<Document> FindAllDocuments(const Query query_words) const {
         vector<Document> matched_documents;
         map<int, double> document_id_relevance;
         for (const string& word : query_words.plus_words) {
             if(documents_index_tf_.count(word)){
                 for(const auto& [id, tf] : documents_index_tf_.at(word)){
-                    double idf = GetInverseDocumentFrequency(word);
+                    double idf = GetIDF(word);
                     document_id_relevance[id] += tf * idf;
                 }
             }
         }
+        
         for(const string& word : query_words.minus_words){
             if (documents_index_tf_.count(word)){
                 for(const auto& [id, tf] : documents_index_tf_.at(word)){
