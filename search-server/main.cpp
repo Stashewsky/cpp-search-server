@@ -64,7 +64,7 @@ public:
    double GetTermFrequency(const vector<string>& words, const string& word, const double& words_size){
        return static_cast<double>(count(words.begin(), words.end(), word)) / words_size;
    }
-    
+   
     void AddDocument(int document_id, const string& document) {
         const vector<string> words = SplitIntoWordsNoStop(document);
         double words_size = words.size();
