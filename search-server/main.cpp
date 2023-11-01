@@ -60,17 +60,12 @@ public:
     void SetDocumentCount(const int& count){
         document_count_ = count;
     }
-    
-   double GetTermFrequency(const vector<string>& words, const string& word, const double& words_size){
-       return static_cast<double>(count(words.begin(), words.end(), word)) / words_size;
-   }
    
     void AddDocument(int document_id, const string& document) {
         const vector<string> words = SplitIntoWordsNoStop(document);
-        double words_size = words.size();
+        double term_frequency = 1.0/words.size();
         for(const string word : words){
-            double term_frequency = GetTermFrequency(words, word, words_size);
-            documents_index_tf_[word].insert({document_id, term_frequency});
+            documents_index_tf_[word][document_id]+=term_frequency;
             }
         }
 
