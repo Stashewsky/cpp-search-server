@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <numeric>
 
 using namespace std;
 
@@ -84,7 +85,11 @@ public:
 
         sort(matched_documents.begin(), matched_documents.end(),
              [](const Document& lhs, const Document& rhs) {
-                 return lhs.relevance > rhs.relevance || ((abs(lhs.relevance - rhs.relevance) < 10e-6) && lhs.rating > rhs.rating);
+                if (abs(lhs.relevance - rhs.relevance) < EPSILON){
+                    return lhs.rating > rhs.rating;
+                }else{
+                    return lhs.relevance > rhs.relevance;
+                }
              });
         if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) {
             matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
@@ -135,10 +140,7 @@ private:
     map<int, DocumentRatingStatus> all_documents_;
 
     static int ComputeAverageRating(const vector<int>& ratings) {
-        int sum = 0;
-        for(const int& i : ratings){
-            sum += i;
-        }
+        int sum = accumulate(ratings.begin(), ratings.end(), 0); //сначала хотел записать отдной строчкой в return, но подумал, что так будет лучше
         return sum / static_cast<int>(ratings.size());
     }
 
