@@ -298,7 +298,7 @@ int main() {
         cout << search_server.GetDocumentId(4) << endl;
 
     }
-    catch(const invalid_argument& e)
+    catch(const out_of_range& e)
     {
         std::cerr << e.what() << '\n';
     }
