@@ -78,20 +78,15 @@ public:
 
             if(!IsValidWord(word)){
                 throw invalid_argument("Ошибка! Стоп-слова содержат спецсимволы!"s);
-            }else if(!word.empty()){
+            }
+            if(!word.empty()){
                 stop_words_.insert(word);
             }
         }
     }
 
     explicit SearchServer(const string& s){
-        if(!IsValidWord(s)){
-            throw invalid_argument("Ошибка! Стоп-слова содержат спецсимволы!"s);
-        }
-
-        for(string& word : SplitIntoWords(s)){
-            stop_words_.insert(word);
-        }
+        SearchServer(SplitIntoWords(s));
     }
 
 
@@ -119,14 +114,11 @@ public:
     vector<Document> FindTopDocuments(const string& raw_query, DocumentPredicate document_predicate) const {
         auto query_words = ParseQuery(raw_query);
         vector<Document> result = FindAllDocuments(query_words, document_predicate);
-
-            sort(result.begin(), result.end(),
-                [](const Document& lhs, const Document& rhs) {
-                    if (abs(lhs.relevance - rhs.relevance) < EPSILON){
-                        return lhs.rating > rhs.rating;
-                    }else{
-                        return lhs.relevance > rhs.relevance;
-                    }
+            sort(result.begin(), result.end(),[](const Document& lhs, const Document& rhs) {
+                if (abs(lhs.relevance - rhs.relevance) < EPSILON){
+                    return lhs.rating > rhs.rating;
+                }
+                return lhs.relevance > rhs.relevance;
                 });
             if (result.size() > MAX_RESULT_DOCUMENT_COUNT) {
                 result.resize(MAX_RESULT_DOCUMENT_COUNT);
@@ -164,12 +156,10 @@ public:
     int GetDocumentCount(){
         return all_documents_.size();
     }
-
+//я сделал, как вы говорите, но у меня вместо моего "информативного" сообщения об ошибке
+//выводится просто слово "vector"  ¯ \ _ (ツ) _ / ¯
     int GetDocumentId(int index) const {
-        if(index < 0 || index > all_documents_.size()){
-            throw out_of_range("Ошибка! Указанный индекс выходит за пределы допустимых значений!"s);
-        }
-        return document_count_[index];
+        return document_count_.at(index);
     }
 
 private:
@@ -214,15 +204,8 @@ private:
         return words;
         }
     }
-    Query ParseQuery(const string& text) const {
-        if(text.empty()){
-            throw invalid_argument("Ошибка! Вы передаете пустой запрос!"s);
-        }else if(!IsValidWord(text)){
-            throw invalid_argument("Ошибка! Запрос содержит спецсимволы!");
-        }
-
-        Query result;
-         for(const string& s : SplitIntoWordsNoStop(text)){
+    //исправил. Можете дать комментарий, почему так лучше?
+    void ParseQueryWord(const string& s, Query& result) const {
             if(s[0] == '-' && s[1] == '-'){
                 throw invalid_argument("Ошибка! В слове запроса содержится два минуса подряд (--)!"s);
             }else if(s[0] == '-' && s.size() == 1){
@@ -233,6 +216,18 @@ private:
             }else{
                 result.plus_words.insert(s);
             }
+        }
+
+    Query ParseQuery(const string& text) const {
+        if(text.empty()){
+            throw invalid_argument("Ошибка! Вы передаете пустой запрос!"s);
+        }else if(!IsValidWord(text)){
+            throw invalid_argument("Ошибка! Запрос содержит спецсимволы!");
+        }
+
+        Query result;
+         for(const string& s : SplitIntoWordsNoStop(text)){
+            ParseQueryWord(s, result);
         }
         return result;
     }
@@ -249,7 +244,9 @@ private:
         for (const string& word : query_words.plus_words) {
             if(documents_index_tf_.count(word)){
                 for(const auto& [id, tf] : documents_index_tf_.at(word)){
-                    if(predicat(id, all_documents_.at(id).status, all_documents_.at(id).rating)){
+                    //вот так надо было сделать?
+                    auto current_document_id = all_documents_.at(id);
+                    if(predicat(id, current_document_id.status, current_document_id.rating)){
                     double idf = GetIDF(word);
                     document_id_relevance[id] += tf * idf;
                     }
@@ -295,10 +292,9 @@ int main() {
     {
         search_server.AddDocument(1, " asd"s, DocumentStatus::ACTUAL, {1,2,3});
         search_server.AddDocument(12, " asd"s, DocumentStatus::ACTUAL, {1,2,3});
-        cout << search_server.GetDocumentId(4) << endl;
-
+        search_server.FindTopDocuments("asd", DocumentStatus::ACTUAL);
     }
-    catch(const out_of_range& e)
+    catch(const invalid_argument& e)
     {
         std::cerr << e.what() << '\n';
     }
