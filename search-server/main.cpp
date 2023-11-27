@@ -85,9 +85,7 @@ public:
         }
     }
 
-    explicit SearchServer(const string& s){
-        SearchServer(SplitIntoWords(s));
-    }
+    explicit SearchServer(const string& s) : SearchServer(SplitIntoWords(s)){}
 
 
     void AddDocument(int document_id, const string& document, DocumentStatus status, const vector<int>& user_ratings) {
