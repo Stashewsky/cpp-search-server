@@ -290,11 +290,14 @@ int main() {
     {
         search_server.AddDocument(1, " asd"s, DocumentStatus::ACTUAL, {1,2,3});
         search_server.AddDocument(12, " asd"s, DocumentStatus::ACTUAL, {1,2,3});
-        search_server.FindTopDocuments("asd", DocumentStatus::ACTUAL);
+        for(auto s : search_server.FindTopDocuments("asd", DocumentStatus::ACTUAL)){
+            PrintDocument(s);
+        }
+
     }
     catch(const invalid_argument& e)
     {
         std::cerr << e.what() << '\n';
     }
-    
+    cout << "test"s << endl;
 }
