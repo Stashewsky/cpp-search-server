@@ -62,14 +62,6 @@ auto Paginate(const Container& c, size_t page_size) {
     return Paginator(begin(c), end(c), page_size);
 }
 
-ostream& operator <<(ostream& out, const Document& document){
-    out << "{ "s
-        << "document_id = "s << document.id << ", "s
-        << "relevance = "s << document.relevance << ", "s
-        << "rating = "s << document.rating << " }"s << endl;
-    return out;
-}
-
 template <typename Iterator>
 ostream& operator<<(ostream& out, const IteratorRange<Iterator>& range){
     for(auto begin = range.begin(); begin != range.end(); ++begin){

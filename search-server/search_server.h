@@ -1,6 +1,9 @@
 #pragma once
 #include "document.h"
+#include <algorithm>
+#include <cmath>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <map>
 using namespace std;

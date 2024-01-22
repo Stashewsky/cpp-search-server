@@ -1,4 +1,5 @@
 #pragma once
+#include <ostream>
 #include <string>
 #include <vector>
 struct Document {
@@ -18,3 +19,5 @@ enum DocumentStatus{
 
 void PrintMatchDocumentResult(std::tuple<std::vector<std::string>, DocumentStatus> s);
 void PrintDocument(const Document& document);
+
+std::ostream& operator <<(std::ostream& out, const Document& document);
