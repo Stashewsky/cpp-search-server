@@ -55,36 +55,7 @@ private:
     double GetIDF(const string& word) const;
 
     template<typename Predicat>
-    vector<Document> FindAllDocuments(const Query& query_words, Predicat predicat) const {
-        vector<Document> matched_documents;
-        map<int, double> document_id_relevance;
-
-        for (const string& word : query_words.plus_words) {
-            if(documents_index_tf_.count(word)){
-                for(const auto& [id, tf] : documents_index_tf_.at(word)){
-                    auto current_document_id = all_documents_.at(id);
-                    if(predicat(id, current_document_id.status, current_document_id.rating)){
-                        double idf = GetIDF(word);
-                        document_id_relevance[id] += tf * idf;
-                    }
-                }
-            }
-        }
-
-        for(const string& word : query_words.minus_words){
-            if (documents_index_tf_.count(word)){
-                for(const auto& [id, tf] : documents_index_tf_.at(word)){
-                    document_id_relevance.erase(id);
-                }
-            }
-        }
-
-        for(const auto& [id, relevance] : document_id_relevance){
-            matched_documents.push_back({id, relevance, all_documents_.at(id).rating});
-        }
-
-        return matched_documents;
-    }
+    vector<Document> FindAllDocuments(const Query& query_words, Predicat predicat) const;
 };
 
 template <typename Collection>
@@ -114,4 +85,36 @@ vector<Document> SearchServer::FindTopDocuments(const string& raw_query, Documen
         result.resize(MAX_RESULT_DOCUMENT_COUNT);
     }
     return result;
+}
+
+template<typename Predicat>
+vector<Document> SearchServer::FindAllDocuments(const Query& query_words, Predicat predicat) const {
+    vector<Document> matched_documents;
+    map<int, double> document_id_relevance;
+
+    for (const string& word : query_words.plus_words) {
+        if(documents_index_tf_.count(word)){
+            for(const auto& [id, tf] : documents_index_tf_.at(word)){
+                auto current_document_id = all_documents_.at(id);
+                if(predicat(id, current_document_id.status, current_document_id.rating)){
+                    double idf = GetIDF(word);
+                    document_id_relevance[id] += tf * idf;
+                }
+            }
+        }
+    }
+
+    for(const string& word : query_words.minus_words){
+        if (documents_index_tf_.count(word)){
+            for(const auto& [id, tf] : documents_index_tf_.at(word)){
+                document_id_relevance.erase(id);
+            }
+        }
+    }
+
+    for(const auto& [id, relevance] : document_id_relevance){
+        matched_documents.push_back({id, relevance, all_documents_.at(id).rating});
+    }
+
+    return matched_documents;
 }
