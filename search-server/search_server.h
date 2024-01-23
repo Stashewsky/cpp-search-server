@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <map>
+
 using namespace std;
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
@@ -14,38 +15,14 @@ const double EPSILON = 10e-6;
 class SearchServer {
 public:
     template <typename Collection>
-    explicit SearchServer(const Collection& c){
-        for (auto& word : c) {
-
-            if(!IsValidWord(word)){
-                throw invalid_argument("Ошибка! Стоп-слова содержат спецсимволы!"s);
-            }
-            if(!word.empty()){
-                stop_words_.insert(word);
-            }
-        }
-    }
+    explicit SearchServer(const Collection& c);
 
     explicit SearchServer(const std::string& s);
-
 
     void AddDocument(int document_id, const string& document, DocumentStatus status, const vector<int>& user_ratings);
 
     template <typename DocumentPredicate>
-    vector<Document> FindTopDocuments(const string& raw_query, DocumentPredicate document_predicate) const {
-        auto query_words = ParseQuery(raw_query);
-        vector<Document> result = FindAllDocuments(query_words, document_predicate);
-        sort(result.begin(), result.end(),[](const Document& lhs, const Document& rhs) {
-            if (abs(lhs.relevance - rhs.relevance) < EPSILON){
-                return lhs.rating > rhs.rating;
-            }
-            return lhs.relevance > rhs.relevance;
-        });
-        if (result.size() > MAX_RESULT_DOCUMENT_COUNT) {
-            result.resize(MAX_RESULT_DOCUMENT_COUNT);
-        }
-        return result;
-    }
+    vector<Document> FindTopDocuments(const string& raw_query, DocumentPredicate document_predicate) const;
 
     vector<Document> FindTopDocuments(const string& raw_query, DocumentStatus document_status) const;
     vector<Document> FindTopDocuments(const string& raw_query) const;
@@ -109,3 +86,32 @@ private:
         return matched_documents;
     }
 };
+
+template <typename Collection>
+SearchServer::SearchServer(const Collection& c){
+    for (auto& word : c) {
+
+        if(!IsValidWord(word)){
+            throw invalid_argument("Ошибка! Стоп-слова содержат спецсимволы!"s);
+        }
+        if(!word.empty()){
+            stop_words_.insert(word);
+        }
+    }
+}
+
+template <typename DocumentPredicate>
+vector<Document> SearchServer::FindTopDocuments(const string& raw_query, DocumentPredicate document_predicate) const {
+    auto query_words = ParseQuery(raw_query);
+    vector<Document> result = FindAllDocuments(query_words, document_predicate);
+    sort(result.begin(), result.end(),[](const Document& lhs, const Document& rhs) {
+        if (abs(lhs.relevance - rhs.relevance) < EPSILON){
+            return lhs.rating > rhs.rating;
+        }
+        return lhs.relevance > rhs.relevance;
+    });
+    if (result.size() > MAX_RESULT_DOCUMENT_COUNT) {
+        result.resize(MAX_RESULT_DOCUMENT_COUNT);
+    }
+    return result;
+}

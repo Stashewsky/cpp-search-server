@@ -2,6 +2,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
+
 struct Document {
     Document() noexcept;
     Document(int id, double relevance, int rating);

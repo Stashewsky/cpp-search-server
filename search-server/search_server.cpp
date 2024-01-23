@@ -1,10 +1,7 @@
-//
-// Created by Станислав on 22.01.2024.
-//
-
 #include "search_server.h"
 #include <numeric>
 #include "string_processing.h"
+
 SearchServer::SearchServer(const std::string &s): SearchServer(SplitIntoWords(s)){}
 
 void SearchServer::AddDocument(int document_id, const string& document, DocumentStatus status, const vector<int>& user_ratings) {

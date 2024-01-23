@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <ostream>
+
 using namespace std;
 
 template <typename It>
@@ -42,6 +43,7 @@ public:
             s += page_size;
         }
     }
+
     auto begin() const {
         return pages_.begin();
     }

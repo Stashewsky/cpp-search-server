@@ -1,8 +1,5 @@
-//
-// Created by Станислав on 22.01.2024.
-//
-
 #include "string_processing.h"
+
 std::vector<std::string> SplitIntoWords(const std::string& text) {
     std::vector<std::string> words;
     std::string word;

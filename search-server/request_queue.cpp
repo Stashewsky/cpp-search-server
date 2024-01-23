@@ -1,8 +1,5 @@
-//
-// Created by Станислав on 22.01.2024.
-//
-
 #include "request_queue.h"
+
 RequestQueue::RequestQueue(const SearchServer& search_server)
         : server_(search_server),
           current_time_(0),
